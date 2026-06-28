@@ -399,8 +399,10 @@
       document.getElementById("cvText").textContent = data.tailored_cv || "";
       document.getElementById("savedFilename").textContent = "output/" + (data.saved_as || "");
 
-      // Cover letter
-      document.getElementById("coverText").textContent = data.cover_letter || "";
+      // Cover letter — render paragraph breaks as actual HTML paragraphs
+      const coverEl = document.getElementById("coverText");
+      const paragraphs = (data.cover_letter || "").split(/\n\n+/);
+      coverEl.innerHTML = paragraphs.map(p => `<p style="margin-bottom:1rem;">${p.replace(/\n/g, "<br>")}</p>`).join("");
 
       // Positioning tip
       document.getElementById("positioningText").textContent = data.positioning_tip || "";
