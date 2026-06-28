@@ -1,0 +1,72 @@
+ASHER BAIG
+Intern / Working Student, Software Development – C# · .NET · REST · SQL
+Bielefeld, Germany  |  +49 176 401 39695  |  ashibaig419@gmail.com
+LinkedIn: https://www.linkedin.com/in/asher-baig-9a9989135/   |   GitHub: github.com/AsherBaig
+
+PROFESSIONAL SUMMARY
+M.Sc. Information Technology student (TH OWL, currently enrolled) with 4+ years of hands-on C#/.NET development. Builds and maintains interface software, REST APIs, and automation, with solid experience in software testing and SQL databases. Curious, hands-on, and proactive, looking to support the development, extension, and testing of software in a working-student / internship role.
+
+EDUCATION
+M.Sc. Information Technology (Informationstechnik)	2024 – Present
+TH OWL – Technische Hochschule Ostwestfalen-Lippe, Germany (currently enrolled)
+B.Sc. Computer Science	2015 – 2018
+University of Karachi (DCS-UBIT), Pakistan
+
+Certification: Udemy – .NET Microservices (Docker, Kubernetes, RabbitMQ). Award: 'Valuable Gem', Bit Development.
+
+TECHNICAL SKILLS
+Programming Languages:       C#, Python, TypeScript, SQL, .NET / .NET Core, OOP, JavaScript
+Frameworks:      ASP.NET Core, FastAPI , Angular, React
+Cloud & DevOps:  Azure, Azure DevOps, Docker, Kubernetes, CI/CD pipelines
+Databases:       SQL Server, Redis, Entity Framework Core, PostgreSQL, MongoDB
+Messaging:       RabbitMQ
+DevOps & Tools: Azure DevOps (working knowledge), Docker, Git, CI/CD, Visual Studio, Agile/Scrum, Github Actions
+AI/LLM:          Anthropic Claude API, ChatGPT Open API, LLM integration, RAG, AI automation 
+
+
+PROFESSIONAL EXPERIENCE
+
+Software Engineer – Sandline Global (Bit Development)	08/2021 – 11/2023
+•   Built and maintained microservices architecture with Docker and Kubernetes
+•   Designed and developed RESTful APIs using ASP.NET Core and C#
+•	Built and maintained interface software and REST APIs in C#/.NET Core, integrating internal tools with third-party systems.
+•	Extended and improved existing .NET applications, implementing new features and fixes independently.
+•	Raised software quality by adding structured logging (Serilog) and systematic module/integration testing.
+•	Automated manual processes with .NET Worker Services, cutting data-processing time ~40%.
+•	Collaborated hands-on in a Scrum team and mentored 7+ junior developers.
+•	Collaborated on Angular and React frontends with TypeScript
+
+Associate Software Engineer – Abic Systems Pvt Ltd	12/2019 – 07/2021
+•   Developed backend services in C# and .NET
+•   Wrote unit and integration tests; maintained code quality standards
+•   Worked in Agile/Scrum teams with regular code reviews
+•	Boosted team productivity 60% by building and integrating reusable modules (C#, ASP.NET Core, MS SQL Server) into an ERP system.
+•	Engineered RESTful APIs and tested modules, delivering iteratively in an agile (Scrum) team.
+•   Worked with SQL Server and Entity Framework Core for data persistence
+
+
+
+PROJECTS
+JD-CV Matcher
+• Python/FastAPI tool that uses Claude API, ChatGPT Open API to analyze job descriptions and tailor CVs automatically.
+Job Scraper API 
+• Built automated job scraper using Python, BeautifulSoup and FastAPI with language and date filtering; outputs structured JSON and CSV
+RAG Document Q&A
+• Built RAG pipeline using LangChain, ChromaDB vector database and Groq LLM for PDF document Q&A; implemented embedding-based semantic search
+
+DevOps Layer
+• Containerized Python FastAPI application using Docker for consistent deployment across environments
+• Built GitHub Actions CI/CD pipeline automating build, test and deployment to Railway on every push
+
+DMS Integration (iManage & Clio)	
+•	.NET 8 · Worker Services · REST API · MS SQL — built interface services and APIs that automate data exchange between systems.
+Workspace Management System   github.com/AsherBaig	
+•	Full-stack app built with a .NET REST API and an Angular front-end, with MS SQL and JWT authentication.
+E-Commerce Microservices	
+•	.NET 6 · Docker · Azure · EF Core — scalable, event-driven services deployed on Azure.
+AVAILABILITY
+
+
+LANGUAGES
+English: C1 (professional working proficiency)
+German: B1 (intermediate)
