@@ -12,7 +12,7 @@ TH OWL – Technische Hochschule Ostwestfalen-Lippe, Germany (currently enrolled
 B.Sc. Computer Science	2015 – 2018
 University of Karachi (DCS-UBIT), Pakistan
 
-Certification: Udemy – .NET Microservices (Docker, Kubernetes, RabbitMQ). Award: 'Valuable Gem', Bit Development.
+Certifications: Udemy – .NET Microservices (Docker, Kubernetes, RabbitMQ). DTZ – Deutsch-Test für Zuwanderer (B1), recognized German language certificate. Award: 'Valuable Gem', Bit Development.
 
 TECHNICAL SKILLS
 Programming Languages:       C#, Python, TypeScript, SQL, .NET / .NET Core, OOP, JavaScript
@@ -69,4 +69,4 @@ AVAILABILITY
 
 LANGUAGES
 English: C1 (professional working proficiency)
-German: B1 (intermediate)
+German: B1 (intermediate) — DTZ certified

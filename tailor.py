@@ -58,11 +58,12 @@ Respond with ONLY a valid JSON object — no markdown fences, no explanation, ju
 Use this exact structure:
 
 {
+  "jd_language": "de" or "en",
   "match_score": <integer 0-100>,
   "matched_keywords": ["keyword1", "keyword2"],
   "missing_keywords": ["keyword1", "keyword2"],
   "tailored_cv": "<full rewritten CV as plain text — use \\n for newlines>",
-  "cover_letter": "<full professional cover letter for this specific role — 3-4 paragraphs, written by a senior recruiter, ready to send>",
+  "cover_letter": "<full professional cover letter — 4 paragraphs — in the same language as the JD>",
   "positioning_tip": "<one paragraph — how to frame the C# to Python/AI/DevOps transition story for this specific role>",
   "learning_roadmap": [
     {
@@ -99,7 +100,9 @@ Rules per field:
     * Include a CURRENTLY LEARNING section: "• [Skill] — [specific project description, not generic] (in progress)" — one line per gap skill. Be specific: say what the project does, not just "building automated workflows"
     * Keep the entire CV to a maximum of 2 pages — remove duplicate bullets, trim redundant lines, merge overlapping experience points to save space
     * All facts must remain true — never fabricate experience
-- cover_letter: full cover letter written as a senior recruiter would write it. Use exactly 4 paragraphs separated by a blank line (\n\n). Structure: (1) opening — who the candidate is and why this specific role and company, (2) what they bring — 2-3 strongest relevant skills/achievements from their CV matched to the JD, (3) transition framing — how their C#/.NET background is an asset not a liability for this role, (4) closing — availability as Werkstudent/Praktikum, enthusiasm, call to action. End with "Sincerely,\nAsher Baig". Professional German market tone. No fluff. Ready to send as-is. Each paragraph must be separated by \n\n — never write it as one block of text.
+- jd_language: detect the language of the job description. Return "de" if German, "en" if English.
+- tailored_cv: if jd_language is "de", write the entire tailored CV in German. If "en", write in English. All formatting rules still apply.
+- cover_letter: if jd_language is "de", write the entire cover letter in German (professional Hochdeutsch, formal Sie form). If "en", write in English. Use exactly 4 paragraphs separated by a blank line (\n\n). Structure: (1) opening — who the candidate is and why this specific role and company, (2) what they bring — 2-3 strongest relevant skills/achievements from their CV matched to the JD, (3) transition framing — how their C#/.NET background is an asset not a liability for this role, (4) closing — availability as Werkstudent/Praktikum, enthusiasm, call to action. End with "Mit freundlichen Grüßen,\nAsher Baig" if German, "Sincerely,\nAsher Baig" if English. Each paragraph must be separated by \n\n — never write it as one block of text.
 - positioning_tip: practical advice on how to talk about the C#-to-Python/AI/DevOps transition in interviews or the application for this specific role.
 - learning_roadmap: only for genuinely missing skills. Max 4 items. Prioritize by impact on getting this role.
 - cv_edits: specific actionable edits the candidate should make to my_cv.txt to better target this role type in future. Max 5 items."""

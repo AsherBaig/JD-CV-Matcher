@@ -187,6 +187,21 @@
 
     .empty-state { color: #475569; font-size: 0.9rem; text-align: center; padding: 2rem; }
 
+    /* German language warning banner */
+    .lang-warning {
+      background: #422006;
+      border: 1px solid #d97706;
+      border-radius: 10px;
+      padding: 0.9rem 1.2rem;
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+    .lang-warning-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .lang-warning-title { font-weight: 700; color: #fcd34d; margin-bottom: 0.2rem; font-size: 0.95rem; }
+    .lang-warning-body  { color: #fde68a; font-size: 0.85rem; line-height: 1.5; }
+
     /* Safety verdict banner */
     .verdict-banner {
       border-radius: 10px; padding: 1rem 1.2rem;
@@ -231,6 +246,17 @@
   <div class="spinner" id="spinner">⏳ Analyzing JD, tailoring CV, and building your learning roadmap… (~20 seconds)</div>
 
   <div id="results">
+
+    <!-- German Language Warning -->
+    <div id="langWarning" style="display:none;">
+      <div class="lang-warning">
+        <div class="lang-warning-icon">⚠️</div>
+        <div>
+          <div class="lang-warning-title">JD is in German — CV and cover letter generated in German</div>
+          <div class="lang-warning-body">Review carefully before sending. LLM-generated German can have subtle grammar errors. Your German is B1 — if unsure, paste the cover letter into DeepL or ask a native speaker to check it.</div>
+        </div>
+      </div>
+    </div>
 
     <!-- Safety Verdict -->
     <div class="card" id="verdictCard">
@@ -377,6 +403,10 @@
       // Keyword tags
       renderTags("matchedTags", data.matched_keywords || [], "match");
       renderTags("missingTags", data.missing_keywords || [], "miss");
+
+      // Show German language warning if JD was in German
+      document.getElementById("langWarning").style.display =
+        data.jd_language === "de" ? "block" : "none";
 
       // Safety verdict
       renderVerdict(data.validation);
