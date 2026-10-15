@@ -1,4 +1,5 @@
 import json
+import os
 import re
 
 from groq import Groq
@@ -15,6 +16,39 @@ def get_client() -> Groq:
 def load_cv(cv_path: str = "my_cv.txt") -> str:
     with open(cv_path, "r", encoding="utf-8") as f:
         return f.read()
+
+
+def get_model_candidates() -> list[str]:
+    env_model = os.getenv("GROQ_MODEL", "").strip()
+    if env_model:
+        return [env_model, "openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile"]
+    return ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile"]
+
+
+_SKIP_CODES = {"model_not_found", "model_decommissioned"}
+
+
+def call_chat_completion(messages: list[dict], temperature: float, max_tokens: int):
+    client = get_client()
+    last_error = None
+
+    for model in get_model_candidates():
+        try:
+            return client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+            error_code = getattr(exc, "code", None)
+            if error_code not in _SKIP_CODES:
+                raise
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("No Groq model was available for chat completion.")
 
 
 # Builds the system prompt for the main analysis + tailoring call.
@@ -152,11 +186,9 @@ JOB DESCRIPTION:
 
 # Calls the Groq API with the main tailoring prompt and returns the parsed result dict.
 def analyze_and_tailor(job_description: str, cv_path: str = "my_cv.txt") -> dict:
-    client = get_client()
     cv_text = load_cv(cv_path)
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+    response = call_chat_completion(
         messages=[
             {"role": "system", "content": build_system_prompt()},
             {"role": "user",   "content": build_user_prompt(cv_text, job_description)},
@@ -176,16 +208,13 @@ def analyze_and_tailor(job_description: str, cv_path: str = "my_cv.txt") -> dict
 # just the two CVs side by side, and returns a verdict with specific flags.
 # Equivalent to running a separate validation service after the main processing step.
 def validate_tailored_cv(original_cv: str, tailored_cv: str) -> dict:
-    client = get_client()
-
     user_message = f"""ORIGINAL CV:
 {original_cv}
 
 TAILORED CV:
 {tailored_cv}"""
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+    response = call_chat_completion(
         messages=[
             {"role": "system", "content": build_validation_prompt()},
             {"role": "user",   "content": user_message},
