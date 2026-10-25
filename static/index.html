@@ -222,6 +222,44 @@
     }
     .flag-type   { font-weight: 700; color: #fb923c; margin-bottom: 0.2rem; }
     .flag-detail { color: #fcd9b0; line-height: 1.5; }
+
+    /* Top navigation */
+    .nav { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .nav-btn {
+      padding: 0.6rem 1.2rem; border-radius: 8px; border: 1px solid #2d3348;
+      background: #1e2130; color: #94a3b8; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    }
+    .nav-btn:hover { border-color: #6366f1; color: #e2e8f0; }
+    .nav-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Dashboard */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: #1e2130; border: 1px solid #2d3348; border-radius: 12px; padding: 1rem 1.2rem; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; color: #f8fafc; }
+    .stat-label { font-size: 0.78rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+    .table-wrap { overflow-x: auto; }
+    .app-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .app-table th {
+      text-align: left; color: #64748b; font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 0.6rem 0.7rem; border-bottom: 1px solid #2d3348;
+    }
+    .app-table td { padding: 0.7rem; border-bottom: 1px solid #1a1e2c; vertical-align: middle; }
+    .app-table tr:hover td { background: #232838; }
+    .company-cell { font-weight: 600; color: #f8fafc; }
+    .score-pill { font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 99px; font-size: 0.8rem; }
+    .score-high { background: #14532d; color: #86efac; }
+    .score-mid  { background: #422006; color: #fcd34d; }
+    .score-low  { background: #450a0a; color: #fca5a5; }
+    .lang-badge { font-size: 0.72rem; font-weight: 700; color: #a5b4fc; background: #312e81; padding: 0.15rem 0.5rem; border-radius: 99px; }
+    .status-select {
+      background: #0f1117; color: #e2e8f0; border: 1px solid #2d3348;
+      border-radius: 6px; padding: 0.3rem 0.4rem; font-size: 0.82rem;
+    }
+    .row-actions { display: flex; gap: 0.4rem; }
+    .row-actions .copy-btn.danger:hover { background: #7f1d1d; color: #fecaca; }
   </style>
 </head>
 <body>
@@ -230,6 +268,27 @@
   <h1>JD–CV Matcher</h1>
   <p class="subtitle">Paste a job description → tailored CV, match analysis, and a personal learning roadmap</p>
 
+  <div class="nav">
+    <button class="nav-btn active" id="nav-analyze" onclick="showView('analyze')">New Analysis</button>
+    <button class="nav-btn" id="nav-dashboard" onclick="showView('dashboard')">📊 Dashboard</button>
+  </div>
+
+  <!-- Dashboard view -->
+  <div class="view" id="view-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Applications</div></div>
+      <div class="stat-card"><div class="stat-value" id="statAvg">—</div><div class="stat-label">Avg match score</div></div>
+      <div class="stat-card"><div class="stat-value" id="statApplied">0</div><div class="stat-label">Applied</div></div>
+      <div class="stat-card"><div class="stat-value" id="statInterviews">0</div><div class="stat-label">Interviews</div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Application History</div>
+      <div class="table-wrap" id="appTableWrap"></div>
+    </div>
+  </div>
+
+  <!-- Analyze view -->
+  <div class="view active" id="view-analyze">
   <div class="card">
     <div class="field">
       <label for="companyName">Company Name</label>
@@ -352,6 +411,7 @@
 
     </div><!-- end card -->
   </div><!-- end results -->
+  </div><!-- end analyze view -->
 </div>
 
 <script>
@@ -395,6 +455,19 @@
         return;
       }
 
+      renderResults(data);
+
+    } catch (err) {
+      showError("Could not reach the server. Is it running? (uvicorn main:app --reload)");
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove("active");
+    }
+  }
+
+  // Fills every result section from an analysis result — used both for a fresh
+  // analysis and for re-opening a stored application from the dashboard.
+  function renderResults(data) {
       // Match score
       const score = data.match_score ?? 0;
       document.getElementById("scoreNum").textContent = score + "%";
@@ -443,17 +516,121 @@
       // CV edits
       renderEdits(data.cv_edits || []);
 
-      results.style.display = "block";
+      document.getElementById("results").style.display = "block";
 
       // Default to CV tab on each new result
       switchTab('tab-cv', document.querySelector('.tab-btn'));
+  }
 
+  // Switches between the "New Analysis" and "Dashboard" views.
+  function showView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+    if (name === 'dashboard') loadDashboard();
+  }
+
+  const STATUSES = ["tailored", "applied", "interview", "rejected", "offer"];
+
+  // Escapes user-provided text before inserting it into HTML.
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text ?? "";
+    return div.innerHTML;
+  }
+
+  // Loads stats + application history from the backend and renders the dashboard.
+  async function loadDashboard() {
+    const wrap = document.getElementById("appTableWrap");
+    try {
+      const response = await fetch("/applications");
+      const data = await response.json();
+      const s = data.stats;
+      document.getElementById("statTotal").textContent = s.total;
+      document.getElementById("statAvg").textContent = s.total ? s.avg_score + "%" : "—";
+      document.getElementById("statApplied").textContent = s.applied;
+      document.getElementById("statInterviews").textContent = s.interviews;
+      renderAppTable(data.applications);
     } catch (err) {
-      showError("Could not reach the server. Is it running? (uvicorn main:app --reload)");
-    } finally {
-      btn.disabled = false;
-      spinner.classList.remove("active");
+      wrap.innerHTML = '<div class="empty-state">Could not load history — is the server running?</div>';
     }
+  }
+
+  // Renders one table row per stored application.
+  function renderAppTable(apps) {
+    const wrap = document.getElementById("appTableWrap");
+    if (!apps.length) {
+      wrap.innerHTML = '<div class="empty-state">No applications yet — run your first analysis to see it here.</div>';
+      return;
+    }
+    const rows = apps.map(a => {
+      const score = a.match_score ?? 0;
+      const scoreClass = score >= 75 ? "score-high" : score >= 50 ? "score-mid" : "score-low";
+      const date = new Date(a.created_at).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+      const verdict = a.verdict === "safe" ? "✅ Safe" : a.verdict === "review" ? "⚠️ Review" : "—";
+      const options = STATUSES.map(st =>
+        `<option value="${st}" ${st === a.status ? "selected" : ""}>${st.charAt(0).toUpperCase() + st.slice(1)}</option>`
+      ).join("");
+      const pdfBtn = a.pdf_filename
+        ? `<button class="copy-btn" onclick="downloadStoredPdf('${encodeURIComponent(a.pdf_filename)}')">PDF</button>`
+        : "";
+      return `
+        <tr>
+          <td class="company-cell">${escapeHtml(a.company_name)}</td>
+          <td>${date}</td>
+          <td><span class="score-pill ${scoreClass}">${score}%</span></td>
+          <td><span class="lang-badge">${escapeHtml((a.jd_language || "?").toUpperCase())}</span></td>
+          <td>${verdict}</td>
+          <td><select class="status-select" onchange="updateStatus(${a.id}, this.value)">${options}</select></td>
+          <td class="row-actions">
+            <button class="copy-btn" onclick="openApplication(${a.id})">Open</button>
+            ${pdfBtn}
+            <button class="copy-btn danger" onclick="deleteApplication(${a.id})">Delete</button>
+          </td>
+        </tr>`;
+    }).join("");
+    wrap.innerHTML = `
+      <table class="app-table">
+        <thead><tr><th>Company</th><th>Date</th><th>Score</th><th>Lang</th><th>Check</th><th>Status</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // Loads a stored application and shows it in the analysis view.
+  async function openApplication(id) {
+    const response = await fetch("/applications/" + id);
+    if (!response.ok) { alert("Application not found."); return; }
+    const app = await response.json();
+    document.getElementById("companyName").value = app.company_name;
+    document.getElementById("jobDesc").value = app.job_description;
+    document.getElementById("errorBox").style.display = "none";
+    showView("analyze");
+    renderResults(app.result);
+    document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Saves a new pipeline status, then refreshes the stats cards.
+  async function updateStatus(id, status) {
+    const response = await fetch("/applications/" + id, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+    if (!response.ok) alert("Could not update status.");
+    loadDashboard();
+  }
+
+  async function deleteApplication(id) {
+    if (!confirm("Delete this application from the history?")) return;
+    await fetch("/applications/" + id, { method: "DELETE" });
+    loadDashboard();
+  }
+
+  function downloadStoredPdf(encodedFilename) {
+    const a = document.createElement("a");
+    a.href = "/download-pdf/" + encodedFilename;
+    a.click();
   }
 
   // Renders keyword chips into a container element.

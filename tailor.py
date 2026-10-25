@@ -70,8 +70,8 @@ Only list a skill as matched if it explicitly appears in the candidate's CV text
 RULE 2 — MISSING SKILLS IN THE 4 EXPANSION AREAS:
 The candidate is actively growing into: (1) AI/LLM, (2) Python automation, (3) workflow automation (n8n, Make, Zapier, Power Automate), (4) DevOps/Cloud.
 For any JD skill in these four areas that is missing from the CV, do ALL THREE of the following:
-  a) Add it directly into the relevant line in the TECHNICAL SKILLS section — no qualifier, no "(learning)" label, just add it to the list naturally alongside existing skills. For example if skills line says "Docker, Kubernetes" and n8n is missing, write "Docker, Kubernetes, n8n".
-  b) Add a project entry in the PROJECTS section with a real description — NOT "n8n Project — (in progress)". Write it like: "• n8n Automation — building a workflow that scrapes job listings, filters by keyword, and sends a Telegram notification (in progress)". Make the description specific and useful to a recruiter.
+  a) Add it directly into the relevant line in the TECHNICAL SKILLS section — no qualifier, no "(learning)" label, just add it to the list naturally alongside existing skills.
+  b) Add a project entry in the PROJECTS section with a real description — NOT "n8n Project — (in progress)".
   c) Add it to the learning_roadmap with the same concrete project idea
 Do not add a separate "Currently expanding" line — integrate cleanly into existing skill categories.
 
@@ -86,6 +86,14 @@ The candidate's real AI tools are Groq API and Claude API — these appear in th
 - For DevOps/Cloud roles: emphasize Docker, Kubernetes, Azure DevOps, CI/CD, GitHub Actions
 - Frame the candidate's transition as a strength: production backend thinking applied to new stack
 - Professional tone matching German market conventions — no fluff or buzzword padding
+
+LANGUAGE DETECTION:
+Before analyzing, detect the JD language:
+- If JD contains German words/structure (z.B., "und", "für", "mit") → "de"
+- If JD contains English words/structure (e.g., "and", "for", "with") → "en"
+- Default to language of FIRST paragraph of JD
+- IMPORTANT: If JD is in English, ALL output (CV, cover letter, roadmap, edits) must be in English.
+- IMPORTANT: If JD is in German, ALL output must be in German.
 
 OUTPUT FORMAT:
 Respond with ONLY a valid JSON object — no markdown fences, no explanation, just raw JSON.
@@ -185,8 +193,9 @@ JOB DESCRIPTION:
 
 
 # Calls the Groq API with the main tailoring prompt and returns the parsed result dict.
-def analyze_and_tailor(job_description: str, cv_path: str = "my_cv.txt") -> dict:
-    cv_text = load_cv(cv_path)
+def analyze_and_tailor(job_description: str, cv_text: str | None = None, cv_path: str = "my_cv.txt") -> dict:
+    if cv_text is None:
+        cv_text = load_cv(cv_path)
 
     response = call_chat_completion(
         messages=[

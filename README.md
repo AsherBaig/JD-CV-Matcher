@@ -18,6 +18,7 @@ A web application that tailors your CV to specific job descriptions using AI (Gr
 - **ATS-Friendly PDF** — German-format PDF (single column, Helvetica, ALL CAPS headers, MM/YYYY dates, 2.5cm margins)
 - **German Language Warning** — Yellow banner when JD is German reminding you to review LLM-generated German text
 - **Auto-save** — Saves `.txt` and `.pdf` to `output/` folder named after the company
+- **Application Dashboard** — Every analysis is stored in SQLite; dashboard shows stats (total, avg score, applied, interviews) and a history table where you can re-open past results, download the PDF, track status (Tailored → Applied → Interview → Rejected/Offer) or delete entries
 
 ---
 
@@ -69,6 +70,7 @@ User Input (Job Description + Company Name)
 - **Groq API** — LLM inference (llama-3.3-70b-versatile)
 - **ReportLab** — ATS-friendly PDF generation
 - **python-dotenv** — Environment variable management
+- **SQLite** (Python `sqlite3`) — Application history for the dashboard (`applications.db`, path configurable via `DB_PATH`)
 
 ### Frontend
 - **HTML5 + Vanilla JavaScript** — No framework, no build tools
@@ -81,6 +83,8 @@ jd-cv-matcher/
 ├── main.py              # FastAPI app, endpoints, orchestration
 ├── tailor.py            # Groq prompts, CV tailoring, validation logic
 ├── pdf_generator.py     # ATS-friendly PDF generation with ReportLab
+├── db.py                # SQLite persistence for application history
+├── tests/               # unittest suite (run: python -m unittest discover -s tests)
 ├── my_cv.txt            # Your CV in plain text — edit this
 ├── requirements.txt     # Python dependencies
 ├── .env                 # GROQ_API_KEY (not committed)
@@ -182,6 +186,18 @@ Analyze a job description and tailor your CV.
 ### `GET /download-pdf/{filename}`
 Download a generated ATS PDF.
 
+### `GET /applications`
+Dashboard data: `{ "stats": {...}, "applications": [...] }`, newest first.
+
+### `GET /applications/{id}`
+One stored application including the full analysis result.
+
+### `PATCH /applications/{id}`
+Update status. Body: `{ "status": "applied" }` — one of `tailored`, `applied`, `interview`, `rejected`, `offer`.
+
+### `DELETE /applications/{id}`
+Remove an application from the history (files in `output/` are kept).
+
 ### `GET /`
 Serves the frontend.
 
@@ -246,6 +262,7 @@ Result shown as **✅ Safe to Send** (green) or **⚠️ Review Before Sending**
 | v1.3 | Missing skills from 4 expansion areas added to CV skills + projects |
 | v1.4 | Cover letter formatted as 4 paragraphs instead of single block |
 | v1.5 | Bilingual support — detects German JDs, generates output in German, shows review warning |
+| v1.6 | Application dashboard — SQLite history, stats, status tracking, re-open past results |
 
 ---
 

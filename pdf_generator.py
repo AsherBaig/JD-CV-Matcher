@@ -82,6 +82,21 @@ KNOWN_HEADERS = {
     "DEVOPS & TOOLS", "DEVOPS LAYER", "AWARDS", "VOLUNTEER",
 }
 
+
+# Detects lines that should be styled like role/degree headings.
+# Keep this narrow so ordinary lines containing dashes, such as certification
+# notes or skill summaries, do not get bolded accidentally in the PDF.
+JOB_TITLE_LINE_RE = re.compile(
+    r"\b(?:0[1-9]|1[0-2])/\d{4}\s*[–-]\s*(?:0[1-9]|1[0-2])/\d{4}|\b(?:0[1-9]|1[0-2])/\d{4}\s*[–-]\s*Present\b|\b\d{4}\s*[–-]\s*Present\b"
+)
+
+
+def is_job_title_line(content: str) -> bool:
+    stripped = content.strip()
+    if not stripped or ":" in stripped:
+        return False
+    return bool(JOB_TITLE_LINE_RE.search(stripped))
+
 def is_section_header(line: str) -> bool:
     stripped = line.strip()
     if not stripped:
@@ -182,7 +197,7 @@ def tokens_to_flowables(tokens: list[tuple[str, str]], styles: dict) -> list:
             ]))
 
         elif token_type == "body":
-            if " – " in content or (" - " in content and not content.startswith("•")):
+            if is_job_title_line(content):
                 flowables.append(Paragraph(safe, styles["job_title"]))
             else:
                 flowables.append(Paragraph(safe, styles["body"]))
