@@ -1,6 +1,6 @@
 # JD-CV Matcher
 
-A web application that tailors your CV to specific job descriptions using AI (Groq API). Built with **FastAPI** (backend) and **Vanilla JS** (frontend), it analyzes job postings, generates personalized cover letters, validates honesty, produces ATS-friendly PDFs, and provides a learning roadmap to close skill gaps.
+A modern full-stack web application that tailors your CV to specific job descriptions using AI (Groq API). Built with **Next.js 15** (frontend) and **FastAPI** (backend), it analyzes job postings, generates personalized cover letters, validates honesty, produces ATS-friendly PDFs, and provides a learning roadmap to close skill gaps.
 
 ---
 
@@ -8,6 +8,8 @@ A web application that tailors your CV to specific job descriptions using AI (Gr
 
 - **AI-Powered CV Tailoring** — Rewrites your CV to match the JD using Groq LLM (llama-3.3-70b-versatile)
 - **Bilingual Support** — Detects JD language (German/English) and generates CV + cover letter in the same language
+- **Student & Professional Modes** — Tailor CV format based on your career stage (working student or full-time professional)
+- **File Upload** — Upload CV as PDF or TXT file directly in the app
 - **Match Score** — Realistic 0-100 score showing how well your CV matches the JD
 - **Keyword Analysis** — Matched keywords (green) and missing keywords (red)
 - **Full Cover Letter** — 4-paragraph professional cover letter written as a senior recruiter, ready to send
@@ -17,7 +19,6 @@ A web application that tailors your CV to specific job descriptions using AI (Gr
 - **How to Position Yourself** — Advice on framing your transition story for interviews
 - **ATS-Friendly PDF** — German-format PDF (single column, Helvetica, ALL CAPS headers, MM/YYYY dates, 2.5cm margins)
 - **German Language Warning** — Yellow banner when JD is German reminding you to review LLM-generated German text
-- **Auto-save** — Saves `.txt` and `.pdf` to `output/` folder named after the company
 - **Application Dashboard** — Every analysis is stored in SQLite; dashboard shows stats (total, avg score, applied, interviews) and a history table where you can re-open past results, download the PDF, track status (Tailored → Applied → Interview → Rejected/Offer) or delete entries
 
 ---
@@ -25,11 +26,12 @@ A web application that tailors your CV to specific job descriptions using AI (Gr
 ## App Flow
 
 ```
-User Input (Job Description + Company Name)
+User Input (Job Description + Company Name / CV Upload)
         ↓
     [Step 1] Analyze & Tailor CV via Groq
         ├─ Detect JD language (German or English)
-        ├─ Load your CV (my_cv.txt)
+        ├─ Load CV from upload or my_cv.txt
+        ├─ Detect user type (student or professional)
         ├─ Call Groq LLM — returns tailored CV, cover letter, score, roadmap, cv edits
         └─ CV and cover letter generated in same language as JD
         ↓
@@ -59,7 +61,7 @@ User Input (Job Description + Company Name)
 | **Cover Letter** | 4-paragraph cover letter ready to send |
 | **How to Position Yourself** | Transition framing advice for this specific role |
 | **Learning Roadmap** | Per missing skill: explanation, connection to existing skills, timeline, project idea |
-| **CV Edits to Make** | Specific edits for your base `my_cv.txt` — current text (red) vs suggested (green) |
+| **CV Edits to Make** | Specific edits for your base CV — current text (red) vs suggested (green) |
 
 ---
 
@@ -70,11 +72,12 @@ User Input (Job Description + Company Name)
 - **Groq API** — LLM inference (llama-3.3-70b-versatile)
 - **ReportLab** — ATS-friendly PDF generation
 - **python-dotenv** — Environment variable management
-- **SQLite** (Python `sqlite3`) — Application history for the dashboard (`applications.db`, path configurable via `DB_PATH`)
+- **SQLite** (Python `sqlite3`) — Application history for the dashboard (`applications.db`)
 
 ### Frontend
-- **HTML5 + Vanilla JavaScript** — No framework, no build tools
-- **CSS** — Dark theme, tab switching, verdict banners
+- **Next.js 15** — React framework with TypeScript
+- **React** — Component-based UI
+- **CSS** — Responsive design, dark theme, tab switching
 - **Fetch API** — REST calls to FastAPI backend
 
 ### Project Structure
@@ -84,14 +87,20 @@ jd-cv-matcher/
 ├── tailor.py            # Groq prompts, CV tailoring, validation logic
 ├── pdf_generator.py     # ATS-friendly PDF generation with ReportLab
 ├── db.py                # SQLite persistence for application history
-├── tests/               # unittest suite (run: python -m unittest discover -s tests)
-├── my_cv.txt            # Your CV in plain text — edit this
+├── frontend/            # Next.js 15 frontend
+│   ├── app/
+│   │   ├── page.tsx         # Home (Analyze page)
+│   │   ├── applications/    # Dashboard
+│   │   └── globals.css
+│   ├── components/      # Reusable React components
+│   ├── lib/             # Utilities (API client, etc.)
+│   └── package.json
+├── tests/               # unittest suite
+├── my_cv.txt            # Your CV in plain text (default fallback)
 ├── requirements.txt     # Python dependencies
 ├── .env                 # GROQ_API_KEY (not committed)
 ├── .env.example         # Template for .env
-├── static/
-│   └── index.html       # Single-page frontend
-└── output/              # Generated .txt and .pdf files (not committed)
+└── output/              # Generated .txt and .pdf files
 ```
 
 ---
@@ -100,6 +109,7 @@ jd-cv-matcher/
 
 ### Prerequisites
 - Python 3.9+
+- Node.js 18+
 - Free Groq API key from [console.groq.com](https://console.groq.com)
 
 ### Installation
@@ -109,27 +119,31 @@ jd-cv-matcher/
 git clone https://github.com/AsherBaig/JD-CV-Matcher.git
 cd JD-CV-Matcher
 
-# 2. Create virtual environment
+# 2. Backend setup
 python3 -m venv .venv
-source .venv/bin/activate      # macOS/Linux
-# .venv\Scripts\activate       # Windows
-
-# 3. Install dependencies
+source .venv/bin/activate          # macOS/Linux
+# .venv\Scripts\activate           # Windows
 pip install -r requirements.txt
 
-# 4. Set up API key
+# 3. Add Groq API key
 cp .env.example .env
 # Edit .env and add your Groq API key:
 # GROQ_API_KEY=gsk_your_key_here
 
-# 5. Add your CV
-# Edit my_cv.txt with your real CV content
+# 4. Frontend setup
+cd frontend
+npm install
+cd ..
 
-# 6. Start the server
+# 5. Start the backend
 uvicorn main:app --reload
-```
 
-Open **http://localhost:8000** in your browser.
+# 6. Start the frontend (in a new terminal)
+cd frontend
+npm run dev
+
+# 7. Open http://localhost:3000 in your browser
+```
 
 ---
 
@@ -142,7 +156,9 @@ Analyze a job description and tailor your CV.
 ```json
 {
   "job_description": "Full job posting text...",
-  "company_name": "Company Name"
+  "company_name": "Company Name",
+  "cv_text": "Optional: provide CV text directly",
+  "user_type": "professional" // or "student"
 }
 ```
 
@@ -245,10 +261,10 @@ Result shown as **✅ Safe to Send** (green) or **⚠️ Review Before Sending**
 | Issue | Solution |
 |---|---|
 | `GROQ_API_KEY is not set` | Add key to `.env` file |
-| `my_cv.txt not found` | Save your CV as `my_cv.txt` in project root |
-| PDF generation fails | Restart server: `uvicorn main:app --reload` |
+| `my_cv.txt not found` | Upload CV as PDF/TXT or save as `my_cv.txt` in project root |
+| PDF generation fails | Restart backend: `uvicorn main:app --reload` |
+| Frontend not connecting | Ensure backend is running on port 8000 and frontend on port 3000 |
 | JSON parse error | Run analysis again — LLM occasionally returns malformed JSON |
-| Server not reachable | Check uvicorn is running at port 8000 |
 
 ---
 
@@ -263,6 +279,7 @@ Result shown as **✅ Safe to Send** (green) or **⚠️ Review Before Sending**
 | v1.4 | Cover letter formatted as 4 paragraphs instead of single block |
 | v1.5 | Bilingual support — detects German JDs, generates output in German, shows review warning |
 | v1.6 | Application dashboard — SQLite history, stats, status tracking, re-open past results |
+| v1.7 | Next.js frontend rewrite — modern UI, file upload, student/professional modes |
 
 ---
 
